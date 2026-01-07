@@ -94,16 +94,22 @@ public class VertexAiEmbeddingModel extends DimensionAwareEmbeddingModel {
                 ensureNotBlank(builder.modelName, "modelName"));
 
         try {
-            PredictionServiceSettings.Builder settingsBuilder =
-                    PredictionServiceSettings.newBuilder().setEndpoint(regionWithBaseAPI);
+            PredictionServiceSettings.Builder settingsBuilder = PredictionServiceSettings.newBuilder().setEndpoint(regionWithBaseAPI);
+            LlmUtilityServiceSettings.Builder llmUtilityServiceSettingsBuilder = LlmUtilityServiceSettings.newBuilder();
+
             if (builder.credentials != null) {
                 GoogleCredentials scopedCredentials =
                         builder.credentials.createScoped("https://www.googleapis.com/auth/cloud-platform");
-                settingsBuilder.setCredentialsProvider(FixedCredentialsProvider.create(scopedCredentials));
+
+                FixedCredentialsProvider credentialsProvider = FixedCredentialsProvider.create(scopedCredentials);
+
+                settingsBuilder.setCredentialsProvider(credentialsProvider);
+                llmUtilityServiceSettingsBuilder.setCredentialsProvider(credentialsProvider);
             }
+
             this.settings = settingsBuilder.build();
 
-            this.llmUtilitySettings = LlmUtilityServiceSettings.newBuilder()
+            this.llmUtilitySettings = llmUtilityServiceSettingsBuilder
                     .setEndpoint(settings.getEndpoint())
                     .build();
         } catch (IOException e) {
